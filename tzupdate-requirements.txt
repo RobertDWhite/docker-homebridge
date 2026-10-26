@@ -1,0 +1,2 @@
+# Runtime utility; build a wheel with distro tooling, without retaining a pipx installer.
+tzupdate==2.1.0 --hash=sha256:5b55795c390e4ccc90e649c8cc387447daaf30a21d68f7196b49824cbcba8adc

@@ -36,6 +36,8 @@ ENV S6_OVERLAY_VERSION=3.2.0.2 \
   HOME="/home/homebridge" \
   npm_config_prefix=/opt/homebridge
 
+COPY tzupdate-requirements.txt /tmp/tzupdate-requirements.txt
+
 RUN set -x \
   && apt-get update \
   && apt-get upgrade -y \
@@ -43,9 +45,16 @@ RUN set -x \
   libatomic1 apt-transport-https apt-utils jq openssl sudo nano net-tools \
   && locale-gen en_US.UTF-8 \
   && ln -snf /usr/share/zoneinfo/Etc/GMT /etc/localtime && echo Etc/GMT > /etc/timezone \
-  && apt-get install -y python3 python3-pip pipx python3-setuptools git make g++ libnss-mdns \
+  && apt-get install -y python3 python3-pip python3-wheel python3-setuptools git make g++ libnss-mdns \
   avahi-discover libavahi-compat-libdnssd-dev python3-venv python3-dev vim \
-  && pipx install tzupdate \
+  && python3 -m pip wheel --no-cache-dir --no-build-isolation --no-deps --require-hashes \
+    -r /tmp/tzupdate-requirements.txt --wheel-dir /tmp/tzupdate-wheels \
+  && python3 -m venv --without-pip /opt/tzupdate \
+  && python3 -m pip --python /opt/tzupdate install --no-index --no-deps /tmp/tzupdate-wheels/*.whl \
+  && ln -s /opt/tzupdate/bin/tzupdate /usr/local/bin/tzupdate \
+  && /opt/tzupdate/bin/python -c 'import tzupdate, importlib.util; assert importlib.util.find_spec("pip") is None' \
+  && /opt/tzupdate/bin/tzupdate --print-only --timezone Etc/UTC \
+  && rm -rf /tmp/tzupdate-wheels /tmp/tzupdate-requirements.txt \
   && chmod 0755 /bin/ping \
   && rm -rf /etc/cron.daily/apt-compat /etc/cron.daily/dpkg /etc/cron.daily/passwd /etc/cron.daily/exim4-base
 
