@@ -50,7 +50,7 @@ RUN set -x \
   && python3 -m pip wheel --no-cache-dir --no-build-isolation --no-deps --require-hashes \
     -r /tmp/tzupdate-requirements.txt --wheel-dir /tmp/tzupdate-wheels \
   && python3 -m venv --without-pip /opt/tzupdate \
-  && python3 -m pip --python /opt/tzupdate install --no-index --no-deps /tmp/tzupdate-wheels/*.whl \
+  && PYTHONPATH=/usr/lib/python3/dist-packages /opt/tzupdate/bin/python -m pip install --no-index --no-deps /tmp/tzupdate-wheels/*.whl \
   && ln -s /opt/tzupdate/bin/tzupdate /usr/local/bin/tzupdate \
   && /opt/tzupdate/bin/python -c 'import tzupdate, importlib.util; assert importlib.util.find_spec("pip") is None' \
   && /opt/tzupdate/bin/tzupdate --print-only --timezone Etc/UTC \
